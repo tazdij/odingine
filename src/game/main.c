@@ -5,17 +5,17 @@
 
 #include <stdbool.h>
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "lua/lua.h"
+#include "lua/lualib.h"
+#include "lua/lauxlib.h"
 
 #include "VikingMQ/VikingMQ.h"
 
-#include <SDL2/SDL.h>
-#ifdef _WIN32
-	#include <GL/glew.h>
-#endif
-#include <SDL2/SDL_opengl.h>
+#include <SDL.h>
+
+#include <GL/glew.h>
+
+
 
 
 #include "window.h"
@@ -56,11 +56,7 @@ int init() {
 		success = 0;
 	}
 
-	// Configure the OpenGL Version
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	
 
 	// Create the window
 	window = Window_new("OdiNgine, base application", SCREEN_WIDTH, SCREEN_HEIGHT);

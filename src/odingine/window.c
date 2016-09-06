@@ -4,6 +4,14 @@
 
 ODIN_Window* Window_new(const char* title, const int width, const int height) {
     ODIN_Window* odin_window = (ODIN_Window*)malloc(sizeof(ODIN_Window));
+
+    //TODO: Configure for mobile
+
+    // Configure the OpenGL Version DESKTOP
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     
     // Temp set pointer to 0 (NULL) - to point at nothing
     odin_window->window = 0;
@@ -31,12 +39,10 @@ ODIN_Window* Window_new(const char* title, const int width, const int height) {
 
     printf("OpenGL %s\n", glGetString(GL_VERSION));
 
-    #ifdef _WIN32
     if (glewInit() != GLEW_OK) {
         printf("Error initializing GLEW!\n");
         return 0;
     }
-    #endif
     
 
     return odin_window;

@@ -1,11 +1,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#ifdef _WIN32
-    #include <GL/glew.h>
-#endif
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <GL/glew.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
 
 /*
     This is the window utility, which will setup our SDL context

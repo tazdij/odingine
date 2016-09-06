@@ -1,3 +1,5 @@
+file(GLOB_RECURSE TARGET_INC ${CMAKE_CURRENT_SOURCE_DIR}/../odingine/*.h)
+include_directories( ${TARGET_INC} )
 IF (ANDROID)
   set(ANDROID_BIN_ROOT ${CMAKE_BINARY_DIR}/android-project)
   add_custom_target(android-install ${ANDROID_ANT} ${ANT_INSTALL_TARGET} WORKING_DIRECTORY ${ANDROID_BIN_ROOT})

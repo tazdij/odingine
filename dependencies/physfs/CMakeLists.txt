@@ -43,7 +43,7 @@ IF(MACOSX)
 
     # Need these everywhere...
     ADD_DEFINITIONS(-fno-common)
-    SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} " -framework Carbon -framework IOKit")
+    SET(OTHER_LDFLAGS ${OTHER_LDFLAGS} "-framework Carbon" "-framework IOKit")
 ENDIF(MACOSX)
 
 # Add some gcc-specific command lines.
