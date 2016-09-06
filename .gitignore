@@ -1,0 +1,16 @@
+.DS_Store
+CMakeCache.txt
+*.a
+*.dylib
+ignore_folder/
+install_manifest.txt
+bin/
+bin-xcode/
+bin-emscripten/
+bin-android/
+build/
+gen/
+libs/
+obj/
+local.properties
+*.so

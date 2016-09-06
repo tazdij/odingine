@@ -1,0 +1,6 @@
+[submodule "dependencies/SDL"]
+	path = dependencies/SDL
+	url = https://github.com/spurious/SDL-mirror.git
+[submodule "dependencies/glew"]
+	path = dependencies/glew
+	url = https://github.com/Perlmint/glew-cmake.git
