@@ -1,5 +1,6 @@
 file(GLOB_RECURSE TARGET_INC ${CMAKE_CURRENT_SOURCE_DIR}/../odingine/*.h)
 include_directories( ${TARGET_INC} )
+
 IF (ANDROID)
   set(ANDROID_BIN_ROOT ${CMAKE_BINARY_DIR}/android-project)
   add_custom_target(android-install ${ANDROID_ANT} ${ANT_INSTALL_TARGET} WORKING_DIRECTORY ${ANDROID_BIN_ROOT})
@@ -26,7 +27,7 @@ IF (ANDROID)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/ ${ANDROID_BIN_ROOT}/libs/${ANDROID_NDK_ABI_NAME})
 ELSE ()
   add_executable (game main.c)
-  target_link_libraries (game odingine)
+  target_link_libraries (game odingine SDL2main)
 
   add_custom_command(TARGET game PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

@@ -43,9 +43,9 @@
 
 typedef struct ODIN_Resource {
     ODIN_UInt32 type_id;
-    ODIN_UInt32 buffer_size;
+    ODIN_UInt64 buffer_size;
     void* buffer;
-    ODIN_UInt32 total_bytes; // The loader is responsible for determining this size
+    ODIN_UInt64 total_bytes; // The loader is responsible for determining this size
     ODIN_UInt32 ref_count;
     const char* fname; // the location of the original file
 } ODIN_Resource;

@@ -1,7 +1,12 @@
 // Windows Specific include (TOCO: Cleanup later)
-#include "targetver.h"
+//#include "targetver.h"
 #include <stdio.h>
 #include <string.h>
+
+#ifdef _WIN32
+	#include <tchar.h>
+	#include <windows.h>
+#endif
 
 #include <stdbool.h>
 
@@ -12,11 +17,7 @@
 #include "VikingMQ/VikingMQ.h"
 
 #include <SDL.h>
-
 #include <GL/glew.h>
-
-
-
 
 #include "window.h"
 #include "resources.h"
@@ -56,8 +57,6 @@ int init() {
 		success = 0;
 	}
 
-	
-
 	// Create the window
 	window = Window_new("OdiNgine, base application", SCREEN_WIDTH, SCREEN_HEIGHT);
 	return success;
@@ -65,8 +64,6 @@ int init() {
 
 int loadMedia() {
 	int success = 1;
-
-	
 
 	return success;
 }
@@ -80,7 +77,6 @@ void close() {
 	// Quit SDL subsystems
 	SDL_Quit();
 
-	
 }
 
 
@@ -124,12 +120,20 @@ int TextResource_Unloader(ODIN_Resource* resource) {
 	return 1;
 }
 
-
+#ifdef _WIN32
+// On windows we need to stop SDL_main from taking over main
+// It isn't going to help us anyway
+// For some reason this is no compatible with the MSVC Linker
+// it is defined ini SDL_main.h as:
+// #define main SDL_main
+//#undef main
+#endif
 int main(int argc, char* argv[]) {
 	printf("Odinheim, you are becoming greater!\n");
 
 	// Initialize the Resources (Resource Manager)
 	// TEMP: only allow Resources to take up 200MB
+	// ADD: argv[0]
 	if (Resources_init(argv[0], 1024 * 1024 * 200) != 0) {
 		printf("Error loading Resource Manager\n");
 		return 1;
@@ -137,8 +141,8 @@ int main(int argc, char* argv[]) {
 
 	// TEST:
 	Resources_addSearchPath("./Data", 1);
-	ODIN_UInt32 RESTYPE_BITMAP = Resources_registerType();
-	ODIN_UInt32 RESTYPE_TEXT = Resources_registerType();
+	ODIN_UInt64 RESTYPE_BITMAP = Resources_registerType();
+	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
 	Resources_registerLoader(RESTYPE_BITMAP, &BitmapResource_Loader, "*.bmp");
 	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
 	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
@@ -194,8 +198,6 @@ int main(int argc, char* argv[]) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9, vertices, GL_STATIC_DRAW);
 
 
-
-
 	// Create a VikingMQ
 	VMQ_MessageQueue *queue = VMQ_NewQueue();
 
@@ -237,13 +239,9 @@ int main(int argc, char* argv[]) {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDisableVertexAttribArray(0);
-		
-
 
 
 		Window_swapBuffer(window);
-
-		
 
 	}
 	
