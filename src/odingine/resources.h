@@ -65,6 +65,7 @@ ODIN_UInt32 Resources_loadResource(const char* fname);
 ODIN_Resource* Resources_getResource(const char* fname);
 ODIN_UInt32 Resources_releaseResource(ODIN_Resource* res);
 
+ODIN_UInt64 Resources_getCacheSize();
 int Resources_fileExists(const char* fname);
 int Resources_addSearchPath(const char* path, int append);
 

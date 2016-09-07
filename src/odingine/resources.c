@@ -44,6 +44,7 @@ ODIN_ResourceUnloader* Resources_findUnloader(ODIN_UInt32 type_id);
 // Resource Cache management
 
 static ODIN_UInt64 cacheSize = 0;
+static ODIN_UInt64 cacheSizeLimit = 0;
 static map_t resourceCache = 0;
 
 // End: Resource Cache management
@@ -63,6 +64,8 @@ int Resources_init(char* arg0, ODIN_UInt64 mem_limit) {
 
     // Initialize the Resource Cache (HashMap)
     resourceCache = hashmap_new();
+    
+    cacheSizeLimit = mem_limit;
 
     return 0;
 }
@@ -138,6 +141,7 @@ ODIN_UInt32 Resources_loadResource(const char* fname) {
         return 0;
     }
     
+    
     ODIN_ResourceLoader* loader = Resources_findLoader(fname);
     if (loader == 0) {
         // There is no loader registered to handle this file extension
@@ -157,6 +161,12 @@ ODIN_UInt32 Resources_loadResource(const char* fname) {
 
     // Get the file size in bytes
     PHYSFS_sint64 fSize = PHYSFS_fileLength(file);
+    
+    // Check if there is space available for at least the buffer size
+    if (cacheSizeLimit - cacheSize <= fSize) {
+        // We need to clear up some space for the resource to load
+        //TODO: Build a freeOne and freeAll function to free up some unused resources
+    }
 
     // Create the buffer to read the file into
     unsigned char* fBuffer = (unsigned char*)malloc(sizeof(unsigned char) * fSize);
@@ -199,6 +209,10 @@ ODIN_UInt32 Resources_loadResource(const char* fname) {
     if (err != MAP_OK) {
         // There was an error inserting the resource into the cache
         PHYSFS_close(file);
+        
+        // Unload the resource, there was an error putting it in the hashmap
+        Resources_freeResource(res);
+        
         free(fBuffer);
         free(res);
         return 0;
@@ -207,6 +221,9 @@ ODIN_UInt32 Resources_loadResource(const char* fname) {
     // Free temp memory used
     PHYSFS_close(file);
     free(fBuffer);
+    
+    // Add the memory used to the cacheSize
+    cacheSize += res->total_bytes;
 
     return 1;
 }
@@ -221,7 +238,7 @@ ODIN_Resource* Resources_getResource(const char* fname) {
     
     if (err != MAP_OK) {
         // We need to try and load the resource
-        if (Resources_loadResource(fname)) {
+        if (!Resources_loadResource(fname)) {
             return 0;
         }
 
@@ -255,12 +272,18 @@ ODIN_UInt32 Resources_releaseResource(ODIN_Resource* res) {
     return 0;
 }
 
+ODIN_UInt64 Resources_getCacheSize() {
+    return cacheSize;
+}
+
 int Resources_fileExists(const char* fname) {
     return PHYSFS_exists(fname);
 }
 
 int Resources_addSearchPath(const char* path, int append) {
     PHYSFS_addToSearchPath(path, append);
+    
+    return 1;
 }
 
 //******************************************************************************
@@ -291,7 +314,14 @@ int Resources_freeResource(ODIN_Resource* resource) {
         return 0;
     }
     
-    unloader->handler(resource);
+    ODIN_UInt64 res_size = resource->total_bytes;
+    if (!unloader->handler(resource)) {
+        // Error, unable to free resource
+        return 0;
+    }
+    
+    // Remove from cacheSize counter
+    cacheSize -= res_size;
  
     return 1;
 }

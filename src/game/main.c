@@ -21,6 +21,7 @@
 
 #include "window.h"
 #include "resources.h"
+#include "shaders.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -89,9 +90,36 @@ int BitmapResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned cha
 	// TODO: Load the resource from the rawdata
 	printf("BitmapResource_Loader called: resource file = %s\n", resource->fname);
 
+	printf("TODO: BitmapResource_Loader not implemented yet.\n");
 	
 	
 	return 1;
+}
+
+int VertexShaderResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
+	// A Shader is a source file that is loaded at runtime (which loads the actual shader parts)
+	// and sent to the GPU to be compiled. Odingine has a single
+	// struct that is used to manage and cache it's 
+	// different information needed during runtime, to avoid round-trips
+	// with the GPU
+
+	unsigned char* tmpSource = (unsigned char*)malloc(sizeof(unsigned char) * (size + 1));
+	memcpy((void*)tmpSource, rawdata, sizeof(unsigned char) * (size + 1));
+	tmpSource[size] = 0;
+
+	resource->buffer = (void*)Shaders_newShaderSource(ODIN_SHADERTYPE_VERTEX, tmpSource);
+
+	resource->total_bytes = sizeof(ODIN_ShaderSource) + (sizeof(unsigned char) * (size + 1));
+	resource->buffer_size = sizeof(ODIN_ShaderSource);
+
+	free(tmpSource);
+
+	return 1;
+}
+
+int VertexShaderResource_Unloader(ODIN_Resource* resource) {
+
+	return 0;
 }
 
 int TextResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
@@ -120,14 +148,7 @@ int TextResource_Unloader(ODIN_Resource* resource) {
 	return 1;
 }
 
-#ifdef _WIN32
-// On windows we need to stop SDL_main from taking over main
-// It isn't going to help us anyway
-// For some reason this is no compatible with the MSVC Linker
-// it is defined ini SDL_main.h as:
-// #define main SDL_main
-//#undef main
-#endif
+
 int main(int argc, char* argv[]) {
 	printf("Odinheim, you are becoming greater!\n");
 
@@ -143,20 +164,32 @@ int main(int argc, char* argv[]) {
 	Resources_addSearchPath("./Data", 1);
 	ODIN_UInt64 RESTYPE_BITMAP = Resources_registerType();
 	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
+	ODIN_UInt64 RESTYPE_SHADERSRC = Resources_registerType();
 	Resources_registerLoader(RESTYPE_BITMAP, &BitmapResource_Loader, "*.bmp");
 	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
+	Resources_registerLoader(RESTYPE_SHADERSRC, &VertexShaderResource_Loader, "*.vs");
 	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
-	
+	Resources_registerUnloader(RESTYPE_SHADERSRC, &VertexShaderResource_Unloader);
+    
+	printf("CacheSize: %llu\n", Resources_getCacheSize());
 
 	if (!Resources_loadResource("hello.txt")) {
 		printf("Unable to load file 'hello.txt', error happend.\n");
+	}
+
+	ODIN_Resource* vertShaderRes = Resources_getResource("test.vs");
+	if (!vertShaderRes) {
+		printf("Unable to load file 'test.vs', error happend.\n");
+	} else {
+		ODIN_ShaderSource* shader = (ODIN_ShaderSource*)vertShaderRes->buffer;
+		printf("Shader Source: \n%s\n", shader->shader_source);
 	}
 
 	if (!Resources_loadResource("helloworld.bmp")) {
 		printf("Unable to load file 'helloworld.bmp', error happend.\n");
 	}
 
-	/*ODIN_Resource* helloText = Resources_getResource("hello.txt");
+	ODIN_Resource* helloText = Resources_getResource("hello.txt");
 	if (!helloText) {
 		printf("There was an error retreiving the resource 'hello.tst'\n");
 	} else {
@@ -164,10 +197,14 @@ int main(int argc, char* argv[]) {
 		char* text = (char*)helloText->buffer;
 		printf("The text is: %s\n", text);  
 	}
+    
+    printf("CacheSize: %llu\n", Resources_getCacheSize());
 
 	Resources_releaseResource(helloText);
 	helloText = 0;
-	*/
+
+	printf("CacheSize: %llu\n", Resources_getCacheSize());
+	
 	// END TEST
 
 	// TEST: init VMQ_Values
