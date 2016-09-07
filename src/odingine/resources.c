@@ -259,6 +259,10 @@ ODIN_Resource* Resources_getResource(const char* fname) {
     @return number of remaining references to resource
 **/
 ODIN_UInt32 Resources_releaseResource(ODIN_Resource* res) {
+	//if (!res) {
+	//	return 0;
+	//}
+
     res->ref_count--;
 
     // TEMP: Remove this after the testing is done

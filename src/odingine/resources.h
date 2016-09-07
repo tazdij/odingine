@@ -50,7 +50,16 @@ typedef struct ODIN_Resource {
     const char* fname; // the location of the original file
 } ODIN_Resource;
 
+
 typedef int (*Resources_Loader)(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata);
+
+
+/*
+	Resources_Unloader
+	The function is responsible for correctly freeing the resource->buffer
+	and is NOT Responsible for freeing the resource itself, this will be
+	done after the Unloader returns 1 to the caller.
+*/
 typedef int (*Resources_Unloader)(ODIN_Resource* resource);
 
 int Resources_init(char* arg0, ODIN_UInt64 mem_limit);
@@ -63,6 +72,12 @@ ODIN_UInt32 Resources_registerUnloader(ODIN_UInt32 type_id, Resources_Unloader h
 
 ODIN_UInt32 Resources_loadResource(const char* fname);
 ODIN_Resource* Resources_getResource(const char* fname);
+
+// This will open an XML file and load all of the resources
+// listed in the group.
+//ODIN_UInt32 Resources_loadResourceGroup(const char* fname);
+
+
 ODIN_UInt32 Resources_releaseResource(ODIN_Resource* res);
 
 ODIN_UInt64 Resources_getCacheSize();

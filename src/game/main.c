@@ -117,9 +117,29 @@ int VertexShaderResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsign
 	return 1;
 }
 
-int VertexShaderResource_Unloader(ODIN_Resource* resource) {
+int FragmentShaderResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
 
-	return 0;
+	unsigned char* tmpSource = (unsigned char*)malloc(sizeof(unsigned char) * (size + 1));
+	memcpy((void*)tmpSource, rawdata, sizeof(unsigned char) * (size + 1));
+	tmpSource[size] = 0;
+
+	resource->buffer = (void*)Shaders_newShaderSource(ODIN_SHADERTYPE_FRAGMENT, tmpSource);
+	resource->total_bytes = sizeof(ODIN_ShaderSource) + (sizeof(unsigned char) * (size + 1));
+	resource->buffer_size = sizeof(ODIN_ShaderSource);
+
+	free(tmpSource);
+
+	return 1;
+}
+
+int ShaderSourceResource_Unloader(ODIN_Resource* resource) {
+	
+	resource->buffer_size = 0;
+	resource->total_bytes = 0;
+	Shaders_freeShaderSource((ODIN_ShaderSource*)resource->buffer);
+	resource->buffer = 0;
+
+	return 1;
 }
 
 int TextResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
@@ -161,16 +181,21 @@ int main(int argc, char* argv[]) {
 	}
 
 	// TEST:
-	Resources_addSearchPath("./Data", 1);
+	Resources_addSearchPath("./assets", 1);
 	ODIN_UInt64 RESTYPE_BITMAP = Resources_registerType();
 	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
 	ODIN_UInt64 RESTYPE_SHADERSRC = Resources_registerType();
+	
 	Resources_registerLoader(RESTYPE_BITMAP, &BitmapResource_Loader, "*.bmp");
+
 	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
-	Resources_registerLoader(RESTYPE_SHADERSRC, &VertexShaderResource_Loader, "*.vs");
 	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
-	Resources_registerUnloader(RESTYPE_SHADERSRC, &VertexShaderResource_Unloader);
+
+	Resources_registerLoader(RESTYPE_SHADERSRC, &VertexShaderResource_Loader, "*.vs");
+	Resources_registerLoader(RESTYPE_SHADERSRC, &FragmentShaderResource_Loader, "*.fs");
+	Resources_registerUnloader(RESTYPE_SHADERSRC, &ShaderSourceResource_Unloader);
     
+
 	printf("CacheSize: %llu\n", Resources_getCacheSize());
 
 	if (!Resources_loadResource("hello.txt")) {
@@ -191,11 +216,11 @@ int main(int argc, char* argv[]) {
 
 	ODIN_Resource* helloText = Resources_getResource("hello.txt");
 	if (!helloText) {
-		printf("There was an error retreiving the resource 'hello.tst'\n");
+		printf("There was an error retreiving the resource 'hello.txt'\n");
 	} else {
 		printf("Retreived the resource %s\n", helloText->fname);
 		char* text = (char*)helloText->buffer;
-		printf("The text is: %s\n", text);  
+		printf("The text is: %s\n", text);
 	}
     
     printf("CacheSize: %llu\n", Resources_getCacheSize());

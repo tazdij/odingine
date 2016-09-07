@@ -16,5 +16,8 @@ ODIN_ShaderSource* Shaders_newShaderSource(int shader_type, unsigned char* sourc
 }
 
 int Shaders_freeShaderSource(ODIN_ShaderSource* obj) {
-    
+	free(obj->shader_source);
+	free(obj);
+
+	return 1;
 }
