@@ -1,9 +1,14 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <GL/glew.h>
+
 #include <SDL.h>
+
+    #include <GL/glew.h>
+
 #include <SDL_opengl.h>
+//#include <SDL_rwops.h>
+//#include "SDL_local.h"
 
 /*
     This is the window utility, which will setup our SDL context

@@ -27,22 +27,41 @@ ODIN_Window* Window_new(const char* title, const int width, const int height) {
 	if (odin_window->window == 0) return 0;
 
 	// Create the actual OpenGL Context
+    SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 	odin_window->context = SDL_GL_CreateContext(odin_window->window);
 
+    if (odin_window->context == 0) {
+        printf("Error creating OpenGL Context!\n");
+        return 0;
+    }
+
+
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        printf("Error initializing GLEW!\n");
+        return 0;
+    }
+
+    if (!GLEW_VERSION_3_3) {
+        printf("OpenGL 3.3 not available\n");
+    }
+    
+
 	// Make GL Context Current
-	SDL_GL_MakeCurrent(odin_window->window, odin_window->context);
+	//SDL_GL_MakeCurrent(odin_window->window, odin_window->context);
 
     // Set VSync
     if (SDL_GL_SetSwapInterval(1) < 0) {
         printf("Warning: Unable to set VSync! Error: %s\n", SDL_GetError());
     }
 
+    //SDL_GL_LoadExtensions();
+
     printf("OpenGL %s\n", glGetString(GL_VERSION));
 
-    if (glewInit() != GLEW_OK) {
-        printf("Error initializing GLEW!\n");
-        return 0;
-    }
+    glViewport(0, 0, width, height);
+
     
 
     return odin_window;

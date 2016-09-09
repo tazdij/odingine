@@ -195,6 +195,12 @@ int main(int argc, char* argv[]) {
 	Resources_registerLoader(RESTYPE_SHADERSRC, &FragmentShaderResource_Loader, "*.fs");
 	Resources_registerUnloader(RESTYPE_SHADERSRC, &ShaderSourceResource_Unloader);
     
+    if (!init())
+        return 1;
+    
+    if (!loadMedia())
+        return 1;
+    
 
 	printf("CacheSize: %llu\n", Resources_getCacheSize());
 
@@ -202,13 +208,32 @@ int main(int argc, char* argv[]) {
 		printf("Unable to load file 'hello.txt', error happend.\n");
 	}
 
+	ODIN_Shader* shaderTest = 0;
 	ODIN_Resource* vertShaderRes = Resources_getResource("test.vs");
 	if (!vertShaderRes) {
 		printf("Unable to load file 'test.vs', error happend.\n");
 	} else {
-		ODIN_ShaderSource* shader = (ODIN_ShaderSource*)vertShaderRes->buffer;
-		printf("Shader Source: \n%s\n", shader->shader_source);
+		ODIN_ShaderSource* vertShader = (ODIN_ShaderSource*)vertShaderRes->buffer;
+		printf("Vertex Shader Source: \n%s\n", vertShader->shader_source);
+
+
+		ODIN_Resource* fragShaderRes = Resources_getResource("test.fs");
+		if (!fragShaderRes) {
+			printf("Unable to load file 'test.fs', error happend.\n");
+		} else {
+			ODIN_ShaderSource* fragShader = (ODIN_ShaderSource*)fragShaderRes->buffer;
+			printf("Fragment Shader Source: \n%s\n", fragShader->shader_source);
+
+			// Create the new Shader Program
+			shaderTest = Shaders_newShader("test", vertShader, fragShader);
+
+			Resources_releaseResource(fragShaderRes);
+		}
+
+		Resources_releaseResource(vertShaderRes);
 	}
+
+	
 
 	if (!Resources_loadResource("helloworld.bmp")) {
 		printf("Unable to load file 'helloworld.bmp', error happend.\n");
@@ -243,11 +268,7 @@ int main(int argc, char* argv[]) {
 	// printf("The Last argument is: %s\n", VMQ_GetString(message, -1));
 
 
-	if (!init())
-		return 1;
-
-	if (!loadMedia())
-		return 1;
+	
 
 	// TEMP: Render test setup
 	printf("Starting gl triangle setup.\n");
