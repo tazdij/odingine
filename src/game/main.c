@@ -246,14 +246,14 @@ int main(int argc, char* argv[]) {
 		printf("Retreived the resource %s\n", helloText->fname);
 		char* text = (char*)helloText->buffer;
 		printf("The text is: %s\n", text);
+
+		printf("CacheSize: %llu\n", Resources_getCacheSize());
+
+		Resources_releaseResource(helloText);
+		helloText = 0;
+
+		printf("CacheSize: %llu\n", Resources_getCacheSize());
 	}
-    
-    printf("CacheSize: %llu\n", Resources_getCacheSize());
-
-	Resources_releaseResource(helloText);
-	helloText = 0;
-
-	printf("CacheSize: %llu\n", Resources_getCacheSize());
 	
 	// END TEST
 
