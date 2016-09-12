@@ -25,7 +25,7 @@ typedef struct ODIN_Shader {
 ODIN_ShaderSource* Shaders_newShaderSource(int shader_type, unsigned char* source);
 int Shaders_freeShaderSource(ODIN_ShaderSource* obj);
 
-ODIN_Shader* Shaders_newShader(unsigned char* name, ODIN_ShaderSource* vert_shader, ODIN_ShaderSource* frag_shader);
+ODIN_Shader* Shaders_newShader(const unsigned char* name, ODIN_ShaderSource* vert_shader, ODIN_ShaderSource* frag_shader);
 int Shaders_freeShader(ODIN_Shader* shader);
 
 #endif

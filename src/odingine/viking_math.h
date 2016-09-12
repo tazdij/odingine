@@ -21,13 +21,32 @@ extern "C" {
 #define VIKING_MATH_VERSION_HEX  ((VIKING_MATH_MAJOR_VERSION << 16) | \
                               (VIKING_MATH_MINOR_VERSION << 8) | \
                               (VIKING_MATH_MICRO_VERSION))
+    
+typedef float* ODIN_Vec3;
+typedef float* ODIN_Vec4;
+typedef float* ODIN_Mat4;
+typedef float* ODIN_Quat;
 
-typedef double *vec3_t;
-typedef double *vec4_t;
-typedef double *mat3_t;
-typedef double *mat4_t;
-typedef double *quat_t;
 
+ODIN_Vec3 Maths_newVec3(ODIN_Vec3 ori);
+ODIN_Vec4 Maths_newVec4(ODIN_Vec4 ori);
+    
+#define ODIN_PI 3.14159f
+#define DEGREES_TO_RADIANS(DEGREE) ((ODIN_PI * DEGREE)/180.0f)
+    
+    
+    
+    
+/*****************************************************************
+ OLD MATH HEADER
+*****************************************************************/
+    
+typedef float *vec3_t;
+typedef float *vec4_t;
+typedef float *mat3_t;
+typedef float *mat4_t;
+typedef float *quat_t;
+    
 /*
  * vec3_t - 3 Dimensional Vector
  */
@@ -125,7 +144,7 @@ vec3_t vec3_negate(vec3_t vec, vec3_t dest);
  * Returns:
  * dest if not NULL, vec otherwise
  */
-vec3_t vec3_scale(vec3_t vec, double val, vec3_t dest);
+vec3_t vec3_scale(vec3_t vec, float val, vec3_t dest);
 
 /*
  * vec3_normalize
@@ -165,7 +184,7 @@ vec3_t vec3_cross (vec3_t vec, vec3_t vec2, vec3_t dest);
  * Returns:
  * Length of vec
  */
-double vec3_length(vec3_t vec);
+float vec3_length(vec3_t vec);
 
 /*
  * vec3_dot
@@ -178,7 +197,7 @@ double vec3_length(vec3_t vec);
  * Returns:
  * Dot product of vec and vec2
  */
-double vec3_dot(vec3_t vec, vec3_t vec2);
+float vec3_dot(vec3_t vec, vec3_t vec2);
 
 /*
  * vec3_direction
@@ -208,7 +227,7 @@ vec3_t vec3_direction (vec3_t vec, vec3_t vec2, vec3_t dest);
  * dest if not NULL, vec otherwise
  */
 
-vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, double lerp, vec3_t dest);
+vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, float lerp, vec3_t dest);
 
 /*
  * vec3_dist
@@ -221,7 +240,7 @@ vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, double lerp, vec3_t dest);
  * Returns:
  * distance between vec and vec2
  */
-double vec3_dist(vec3_t vec, vec3_t vec2);
+float vec3_dist(vec3_t vec, vec3_t vec2);
 
 /*
  * vec3_unproject
@@ -393,7 +412,7 @@ mat4_t mat4_transpose(mat4_t mat, mat4_t dest);
  * Returns:
  * determinant of mat
  */
-double mat4_determinant(mat4_t mat);
+float mat4_determinant(mat4_t mat);
 
 /*
  * mat4_inverse
@@ -533,7 +552,7 @@ mat4_t mat4_scale(mat4_t mat, vec3_t vec, mat4_t dest);
  * Returns:
  * dest if not NULL, mat otherwise
  */
-mat4_t mat4_rotate(mat4_t mat, double angle, vec3_t axis, mat4_t dest);
+mat4_t mat4_rotate(mat4_t mat, float angle, vec3_t axis, mat4_t dest);
 
 /*
  * mat4_rotateX
@@ -547,7 +566,7 @@ mat4_t mat4_rotate(mat4_t mat, double angle, vec3_t axis, mat4_t dest);
  * Returns:
  * dest if not NULL, mat otherwise
  */
-mat4_t mat4_rotateX(mat4_t mat, double angle, mat4_t dest);
+mat4_t mat4_rotateX(mat4_t mat, float angle, mat4_t dest);
 
 /*
  * mat4_rotateY
@@ -561,7 +580,7 @@ mat4_t mat4_rotateX(mat4_t mat, double angle, mat4_t dest);
  * Returns:
  * dest if not NULL, mat otherwise
  */
-mat4_t mat4_rotateY(mat4_t mat, double angle, mat4_t dest);
+mat4_t mat4_rotateY(mat4_t mat, float angle, mat4_t dest);
 
 /*
  * mat4_rotateZ
@@ -575,7 +594,7 @@ mat4_t mat4_rotateY(mat4_t mat, double angle, mat4_t dest);
  * Returns:
  * dest if not NULL, mat otherwise
  */
-mat4_t mat4_rotateZ(mat4_t mat, double angle, mat4_t dest);
+mat4_t mat4_rotateZ(mat4_t mat, float angle, mat4_t dest);
 
 /*
  * mat4_frustum
@@ -590,7 +609,7 @@ mat4_t mat4_rotateZ(mat4_t mat, double angle, mat4_t dest);
  * Returns:
  * dest if not NULL, a new mat4_t otherwise
  */
-mat4_t mat4_frustum(double left, double right, double bottom, double top, double near, double far, mat4_t dest);
+mat4_t mat4_frustum(float left, float right, float bottom, float top, float near, float far, mat4_t dest);
 
 /*
  * mat4_perspective
@@ -605,7 +624,7 @@ mat4_t mat4_frustum(double left, double right, double bottom, double top, double
  * Returns:
  * dest if not NULL, a new mat4_t otherwise
  */
-mat4_t mat4_perspective(double fovy, double aspect, double near, double far, mat4_t dest);
+mat4_t mat4_perspective(float fovy, float aspect, float near, float far, mat4_t dest);
 
 /*
  * mat4_ortho
@@ -620,7 +639,7 @@ mat4_t mat4_perspective(double fovy, double aspect, double near, double far, mat
  * Returns:
  * dest if not NULL, a new mat4_t otherwise
  */
-mat4_t mat4_ortho(double left, double right, double bottom, double top, double near, double far, mat4_t dest);
+mat4_t mat4_ortho(float left, float right, float bottom, float top, float near, float far, mat4_t dest);
 
 /*
  * mat4_lookAt
@@ -721,7 +740,7 @@ quat_t quat_calculateW(quat_t quat, quat_t dest);
  *
  * @return {number} Dot product of quat and quat2
  */
-double quat_dot(quat_t quat, quat_t quat2);
+float quat_dot(quat_t quat, quat_t quat2);
 
 /*
  * quat_inverse
@@ -759,7 +778,7 @@ quat_t quat_conjugate(quat_t quat, quat_t dest);
  * Returns:
  * Length of quat
  */
-double quat_length(quat_t quat);
+float quat_length(quat_t quat);
 
 /*
  * quat_normalize
@@ -842,7 +861,7 @@ quat_t quat_toMat4(quat_t quat, mat4_t dest);
  * Returns:
  * dest if not NULL, quat otherwise
  */
-quat_t quat_slerp(quat_t quat, quat_t quat2, double slerp, quat_t dest);
+quat_t quat_slerp(quat_t quat, quat_t quat2, float slerp, quat_t dest);
 
 /*
  * quat_str

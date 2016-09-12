@@ -49,14 +49,12 @@ ODIN_Window* Window_new(const char* title, const int width, const int height) {
     
 
 	// Make GL Context Current
-	//SDL_GL_MakeCurrent(odin_window->window, odin_window->context);
+	SDL_GL_MakeCurrent(odin_window->window, odin_window->context);
 
     // Set VSync
     if (SDL_GL_SetSwapInterval(1) < 0) {
         printf("Warning: Unable to set VSync! Error: %s\n", SDL_GetError());
     }
-
-    //SDL_GL_LoadExtensions();
 
     printf("OpenGL %s\n", glGetString(GL_VERSION));
 

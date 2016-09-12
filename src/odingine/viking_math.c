@@ -4,11 +4,42 @@
 
 #include "viking_math.h"
 
+ODIN_Vec3 Maths_newVec3(ODIN_Vec3 ori) {
+    ODIN_Vec3 vec = (float*)calloc(sizeof(float), 3);
+    
+    if (ori) {
+        vec[0] = ori[0];
+        vec[1] = ori[1];
+        vec[2] = ori[2];
+    } else {
+        vec[0] = vec[1] = vec[2] = 0;
+    }
+    
+    return vec;
+}
+
+ODIN_Vec4 Maths_newVec4(ODIN_Vec4 ori) {
+    ODIN_Vec4 vec = (float*)calloc(sizeof(float), 4);
+    
+    if (ori) {
+        vec[0] = ori[0];
+        vec[1] = ori[1];
+        vec[2] = ori[2];
+        vec[3] = ori[3];
+    } else {
+        vec[0] = vec[1] = vec[2] = vec[3] = 0;
+    }
+    
+    return vec;
+}
+
+
+
 /**
     VECTOR 3
 **/
 vec3_t vec3_create(vec3_t vec) {
-    vec3_t dest = calloc(sizeof(double_t), 3);
+    vec3_t dest = calloc(sizeof(float_t), 3);
 
     if (vec) {
         dest[0] = vec[0];
@@ -81,7 +112,7 @@ vec3_t vec3_negate(vec3_t vec, vec3_t dest) {
     return dest;
 }
 
-vec3_t vec3_scale(vec3_t vec, double val, vec3_t dest) {
+vec3_t vec3_scale(vec3_t vec, float val, vec3_t dest) {
     if (!dest || vec == dest) {
         vec[0] *= val;
         vec[1] *= val;
@@ -98,7 +129,7 @@ vec3_t vec3_scale(vec3_t vec, double val, vec3_t dest) {
 vec3_t vec3_normalize(vec3_t vec, vec3_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0], y = vec[1], z = vec[2],
+    float x = vec[0], y = vec[1], z = vec[2],
         len = sqrt(x * x + y * y + z * z);
 
     if (!len) {
@@ -123,7 +154,7 @@ vec3_t vec3_normalize(vec3_t vec, vec3_t dest) {
 vec3_t vec3_cross (vec3_t vec, vec3_t vec2, vec3_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0], y = vec[1], z = vec[2],
+    float x = vec[0], y = vec[1], z = vec[2],
         x2 = vec2[0], y2 = vec2[1], z2 = vec2[2];
 
     dest[0] = y * z2 - z * y2;
@@ -132,19 +163,19 @@ vec3_t vec3_cross (vec3_t vec, vec3_t vec2, vec3_t dest) {
     return dest;
 }
 
-double vec3_length(vec3_t vec) {
-    double x = vec[0], y = vec[1], z = vec[2];
+float vec3_length(vec3_t vec) {
+    float x = vec[0], y = vec[1], z = vec[2];
     return sqrt(x * x + y * y + z * z);
 }
 
-double vec3_dot(vec3_t vec, vec3_t vec2) {
+float vec3_dot(vec3_t vec, vec3_t vec2) {
     return vec[0] * vec2[0] + vec[1] * vec2[1] + vec[2] * vec2[2];
 }
 
 vec3_t vec3_direction (vec3_t vec, vec3_t vec2, vec3_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0] - vec2[0],
+    float x = vec[0] - vec2[0],
         y = vec[1] - vec2[1],
         z = vec[2] - vec2[2],
         len = sqrt(x * x + y * y + z * z);
@@ -163,7 +194,7 @@ vec3_t vec3_direction (vec3_t vec, vec3_t vec2, vec3_t dest) {
     return dest;
 }
 
-vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, double lerp, vec3_t dest) {
+vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, float lerp, vec3_t dest) {
     if (!dest) { dest = vec; }
 
     dest[0] = vec[0] + lerp * (vec2[0] - vec[0]);
@@ -173,8 +204,8 @@ vec3_t vec3_lerp(vec3_t vec, vec3_t vec2, double lerp, vec3_t dest) {
     return dest;
 }
 
-double vec3_dist(vec3_t vec, vec3_t vec2) {
-    double x = vec2[0] - vec[0],
+float vec3_dist(vec3_t vec, vec3_t vec2) {
+    float x = vec2[0] - vec[0],
         y = vec2[1] - vec[1],
         z = vec2[2] - vec[2];
         
@@ -185,7 +216,7 @@ vec3_t vec3_unproject(vec3_t vec, mat4_t view, mat4_t proj, vec4_t viewport, vec
     if (!dest) { dest = vec; }
 
     mat4_t m = mat4_create(NULL);
-    double *v = malloc(sizeof(double) * 4);
+    float *v = malloc(sizeof(float) * 4);
     
     v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
     v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
@@ -210,7 +241,7 @@ vec3_t vec3_unproject(vec3_t vec, mat4_t view, mat4_t proj, vec4_t viewport, vec
 **/
 
 mat3_t mat3_create(mat3_t mat) {
-    mat3_t dest = calloc(sizeof(double), 9);
+    mat3_t dest = calloc(sizeof(float), 9);
 
     if (mat) {
         dest[0] = mat[0];
@@ -257,7 +288,7 @@ mat3_t mat3_identity(mat3_t dest) {
 mat3_t mat3_transpose(mat3_t mat, mat3_t dest) {
     // If we are transposing ourselves we can skip a few steps but have to cache some values
     if (!dest || mat == dest) {
-        double a01 = mat[1], a02 = mat[2],
+        float a01 = mat[1], a02 = mat[2],
             a12 = mat[5];
 
         mat[1] = mat[3];
@@ -312,7 +343,7 @@ mat4_t mat3_toMat4(mat3_t mat, mat4_t dest) {
 **/
 
 mat4_t mat4_create(mat4_t mat) {
-    mat4_t dest = calloc(sizeof(double), 16);
+    mat4_t dest = calloc(sizeof(float), 16);
 
     if (mat) {
         dest[0] = mat[0];
@@ -380,7 +411,7 @@ mat4_t mat4_identity(mat4_t dest) {
 mat4_t mat4_transpose(mat4_t mat, mat4_t dest) {
     // If we are transposing ourselves we can skip a few steps but have to cache some values
     if (!dest || mat == dest) {
-        double a01 = mat[1], a02 = mat[2], a03 = mat[3],
+        float a01 = mat[1], a02 = mat[2], a03 = mat[3],
             a12 = mat[6], a13 = mat[7],
             a23 = mat[11];
 
@@ -418,9 +449,9 @@ mat4_t mat4_transpose(mat4_t mat, mat4_t dest) {
     return dest;
 }
 
-double mat4_determinant(mat4_t mat) {
+float mat4_determinant(mat4_t mat) {
     // Cache the matrix values (makes for huge speed increases!)
-    double a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+    float a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
         a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
         a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
         a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15];
@@ -437,7 +468,7 @@ mat4_t mat4_inverse(mat4_t mat, mat4_t dest) {
     if (!dest) { dest = mat; }
 
     // Cache the matrix values (makes for huge speed increases!)
-    double a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+    float a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
         a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
         a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
         a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15],
@@ -523,7 +554,7 @@ mat3_t mat4_toMat3(mat4_t mat, mat3_t dest) {
 
 mat3_t mat4_toInverseMat3(mat4_t mat, mat3_t dest) {
     // Cache the matrix values (makes for huge speed increases!)
-    double a00 = mat[0], a01 = mat[1], a02 = mat[2],
+    float a00 = mat[0], a01 = mat[1], a02 = mat[2],
         a10 = mat[4], a11 = mat[5], a12 = mat[6],
         a20 = mat[8], a21 = mat[9], a22 = mat[10],
 
@@ -556,7 +587,7 @@ mat4_t mat4_multiply(mat4_t mat, mat4_t mat2, mat4_t dest) {
     if (!dest) { dest = mat; }
 
     // Cache the matrix values (makes for huge speed increases!)
-    double a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+    float a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
         a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
         a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
         a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15],
@@ -589,7 +620,7 @@ mat4_t mat4_multiply(mat4_t mat, mat4_t mat2, mat4_t dest) {
 mat4_t mat4_multiplyVec3(mat4_t mat, vec3_t vec, mat4_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0], y = vec[1], z = vec[2];
+    float x = vec[0], y = vec[1], z = vec[2];
 
     dest[0] = mat[0] * x + mat[4] * y + mat[8] * z + mat[12];
     dest[1] = mat[1] * x + mat[5] * y + mat[9] * z + mat[13];
@@ -601,7 +632,7 @@ mat4_t mat4_multiplyVec3(mat4_t mat, vec3_t vec, mat4_t dest) {
 mat4_t mat4_multiplyVec4(mat4_t mat, vec4_t vec, mat4_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0], y = vec[1], z = vec[2], w = vec[3];
+    float x = vec[0], y = vec[1], z = vec[2], w = vec[3];
 
     dest[0] = mat[0] * x + mat[4] * y + mat[8] * z + mat[12] * w;
     dest[1] = mat[1] * x + mat[5] * y + mat[9] * z + mat[13] * w;
@@ -612,7 +643,7 @@ mat4_t mat4_multiplyVec4(mat4_t mat, vec4_t vec, mat4_t dest) {
 }
 
 mat4_t mat4_translate(mat4_t mat, vec3_t vec, mat4_t dest) {
-    double x = vec[0], y = vec[1], z = vec[2],
+    float x = vec[0], y = vec[1], z = vec[2],
         a00, a01, a02, a03,
         a10, a11, a12, a13,
         a20, a21, a22, a23;
@@ -641,7 +672,7 @@ mat4_t mat4_translate(mat4_t mat, vec3_t vec, mat4_t dest) {
 }
 
 mat4_t mat4_scale(mat4_t mat, vec3_t vec, mat4_t dest) {
-    double x = vec[0], y = vec[1], z = vec[2];
+    float x = vec[0], y = vec[1], z = vec[2];
 
     if (!dest || mat == dest) {
         mat[0] *= x;
@@ -678,8 +709,8 @@ mat4_t mat4_scale(mat4_t mat, vec3_t vec, mat4_t dest) {
     return dest;
 }
 
-mat4_t mat4_rotate(mat4_t mat, double angle, vec3_t axis, mat4_t dest) {
-    double x = axis[0], y = axis[1], z = axis[2],
+mat4_t mat4_rotate(mat4_t mat, float angle, vec3_t axis, mat4_t dest) {
+    float x = axis[0], y = axis[1], z = axis[2],
         len = sqrt(x * x + y * y + z * z),
         s, c, t,
         a00, a01, a02, a03,
@@ -737,8 +768,8 @@ mat4_t mat4_rotate(mat4_t mat, double angle, vec3_t axis, mat4_t dest) {
     return dest;
 }
 
-mat4_t mat4_rotateX(mat4_t mat, double angle, mat4_t dest) {
-    double s = sin(angle),
+mat4_t mat4_rotateX(mat4_t mat, float angle, mat4_t dest) {
+    float s = sin(angle),
         c = cos(angle),
         a10 = mat[4],
         a11 = mat[5],
@@ -776,8 +807,8 @@ mat4_t mat4_rotateX(mat4_t mat, double angle, mat4_t dest) {
     return dest;
 }
 
-mat4_t mat4_rotateY(mat4_t mat, double angle, mat4_t dest) {
-    double s = sin(angle),
+mat4_t mat4_rotateY(mat4_t mat, float angle, mat4_t dest) {
+    float s = sin(angle),
         c = cos(angle),
         a00 = mat[0],
         a01 = mat[1],
@@ -815,8 +846,8 @@ mat4_t mat4_rotateY(mat4_t mat, double angle, mat4_t dest) {
     return dest;
 }
 
-mat4_t mat4_rotateZ(mat4_t mat, double angle, mat4_t dest) {
-    double s = sin(angle),
+mat4_t mat4_rotateZ(mat4_t mat, float angle, mat4_t dest) {
+    float s = sin(angle),
         c = cos(angle),
         a00 = mat[0],
         a01 = mat[1],
@@ -855,9 +886,9 @@ mat4_t mat4_rotateZ(mat4_t mat, double angle, mat4_t dest) {
     return dest;
 }
 
-mat4_t mat4_frustum(double left, double right, double bottom, double top, double near, double far, mat4_t dest) {
+mat4_t mat4_frustum(float left, float right, float bottom, float top, float near, float far, mat4_t dest) {
     if (!dest) { dest = mat4_create(NULL); }
-    double rl = (right - left),
+    float rl = (right - left),
         tb = (top - bottom),
         fn = (far - near);
     dest[0] = (near * 2) / rl;
@@ -879,15 +910,15 @@ mat4_t mat4_frustum(double left, double right, double bottom, double top, double
     return dest;
 }
 
-mat4_t mat4_perspective(double fovy, double aspect, double near, double far, mat4_t dest) {
-    double top = near * tan(fovy * 3.14159265358979323846 / 360.0),
+mat4_t mat4_perspective(float fovy, float aspect, float near, float far, mat4_t dest) {
+    float top = near * tan(fovy * 3.14159265358979323846 / 360.0),
         right = top * aspect;
     return mat4_frustum(-right, right, -top, top, near, far, dest);
 }
 
-mat4_t mat4_ortho(double left, double right, double bottom, double top, double near, double far, mat4_t dest) {
+mat4_t mat4_ortho(float left, float right, float bottom, float top, float near, float far, mat4_t dest) {
     if (!dest) { dest = mat4_create(NULL); }
-    double rl = (right - left),
+    float rl = (right - left),
         tb = (top - bottom),
         fn = (far - near);
     dest[0] = 2 / rl;
@@ -912,7 +943,7 @@ mat4_t mat4_ortho(double left, double right, double bottom, double top, double n
 mat4_t mat4_lookAt(vec3_t eye, vec3_t center, vec3_t up, mat4_t dest) {
     if (!dest) { dest = mat4_create(NULL); }
 
-    double x0, x1, x2, y0, y1, y2, z0, z1, z2, len,
+    float x0, x1, x2, y0, y1, y2, z0, z1, z2, len,
         eyex = eye[0],
         eyey = eye[1],
         eyez = eye[2],
@@ -995,7 +1026,7 @@ mat4_t mat4_fromRotationTranslation(quat_t quat, vec3_t vec, mat4_t dest) {
     if (!dest) { dest = mat4_create(NULL); }
 
     // Quaternion math
-    double x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+    float x = quat[0], y = quat[1], z = quat[2], w = quat[3],
         x2 = x + x,
         y2 = y + y,
         z2 = z + z,
@@ -1035,7 +1066,7 @@ mat4_t mat4_fromRotationTranslation(quat_t quat, vec3_t vec, mat4_t dest) {
 **/
 
 quat_t quat_create(quat_t quat) {
-    quat_t dest = calloc(sizeof(double), 4);
+    quat_t dest = calloc(sizeof(float), 4);
 
     if (quat) {
         dest[0] = quat[0];
@@ -1057,7 +1088,7 @@ quat_t quat_set(quat_t quat, quat_t dest) {
 }
 
 quat_t quat_calculateW(quat_t quat, quat_t dest) {
-    double x = quat[0], y = quat[1], z = quat[2];
+    float x = quat[0], y = quat[1], z = quat[2];
 
     if (!dest || quat == dest) {
         quat[3] = -sqrt(fabs(1.0 - x * x - y * y - z * z));
@@ -1070,12 +1101,12 @@ quat_t quat_calculateW(quat_t quat, quat_t dest) {
     return dest;
 }
 
-double quat_dot(quat_t quat, quat_t quat2) {
+float quat_dot(quat_t quat, quat_t quat2) {
     return quat[0]*quat2[0] + quat[1]*quat2[1] + quat[2]*quat2[2] + quat[3]*quat2[3];
 }
 
 quat_t quat_inverse(quat_t quat, quat_t dest) {
-    double dot = quat_dot(quat,quat),
+    float dot = quat_dot(quat,quat),
         invDot = 1.0/dot;
     if(!dest || quat == dest) {
         quat[0] *= -invDot;
@@ -1105,15 +1136,15 @@ quat_t quat_conjugate(quat_t quat, quat_t dest) {
     return dest;
 }
 
-double quat_length(quat_t quat) {
-    double x = quat[0], y = quat[1], z = quat[2], w = quat[3];
+float quat_length(quat_t quat) {
+    float x = quat[0], y = quat[1], z = quat[2], w = quat[3];
     return sqrt(x * x + y * y + z * z + w * w);
 }
 
 quat_t quat_normalize(quat_t quat, quat_t dest) {
     if (!dest) { dest = quat; }
 
-    double x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+    float x = quat[0], y = quat[1], z = quat[2], w = quat[3],
         len = sqrt(x * x + y * y + z * z + w * w);
     if (len == 0) {
         dest[0] = 0;
@@ -1134,7 +1165,7 @@ quat_t quat_normalize(quat_t quat, quat_t dest) {
 quat_t quat_multiply(quat_t quat, quat_t quat2, quat_t dest) {
     if (!dest) { dest = quat; }
 
-    double qax = quat[0], qay = quat[1], qaz = quat[2], qaw = quat[3],
+    float qax = quat[0], qay = quat[1], qaz = quat[2], qaw = quat[3],
         qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
 
     dest[0] = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
@@ -1148,7 +1179,7 @@ quat_t quat_multiply(quat_t quat, quat_t quat2, quat_t dest) {
 quat_t quat_multiplyVec3(quat_t quat, vec3_t vec, vec3_t dest) {
     if (!dest) { dest = vec; }
 
-    double x = vec[0], y = vec[1], z = vec[2],
+    float x = vec[0], y = vec[1], z = vec[2],
         qx = quat[0], qy = quat[1], qz = quat[2], qw = quat[3],
 
         // calculate quat * vec
@@ -1168,7 +1199,7 @@ quat_t quat_multiplyVec3(quat_t quat, vec3_t vec, vec3_t dest) {
 mat3_t quat_toMat3(quat_t quat, mat3_t dest) {
     if (!dest) { dest = mat3_create(NULL); }
 
-    double x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+    float x = quat[0], y = quat[1], z = quat[2], w = quat[3],
         x2 = x + x,
         y2 = y + y,
         z2 = z + z,
@@ -1201,7 +1232,7 @@ mat3_t quat_toMat3(quat_t quat, mat3_t dest) {
 quat_t quat_toMat4(quat_t quat, mat4_t dest) {
     if (!dest) { dest = mat4_create(NULL); }
 
-    double x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+    float x = quat[0], y = quat[1], z = quat[2], w = quat[3],
         x2 = x + x,
         y2 = y + y,
         z2 = z + z,
@@ -1239,10 +1270,10 @@ quat_t quat_toMat4(quat_t quat, mat4_t dest) {
     return dest;
 }
 
-quat_t quat_slerp(quat_t quat, quat_t quat2, double slerp, quat_t dest) {
+quat_t quat_slerp(quat_t quat, quat_t quat2, float slerp, quat_t dest) {
     if (!dest) { dest = quat; }
 
-    double cosHalfTheta = quat[0] * quat2[0] + quat[1] * quat2[1] + quat[2] * quat2[2] + quat[3] * quat2[3],
+    float cosHalfTheta = quat[0] * quat2[0] + quat[1] * quat2[1] + quat[2] * quat2[2] + quat[3] * quat2[3],
         halfTheta,
         sinHalfTheta,
         ratioA,

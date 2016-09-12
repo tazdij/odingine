@@ -29,17 +29,12 @@ int Shaders_freeShaderSource(ODIN_ShaderSource* obj) {
 //    unsigned char* name;
 //} ODIN_Shader;
 
-ODIN_Shader* Shaders_newShader(unsigned char* name, ODIN_ShaderSource* vert_shader, ODIN_ShaderSource* frag_shader) {
+ODIN_Shader* Shaders_newShader(const unsigned char* name, ODIN_ShaderSource* vert_shader, ODIN_ShaderSource* frag_shader) {
     printf("Shaders_newShader()\n");
     ODIN_Shader* shader = (ODIN_Shader*)malloc(sizeof(ODIN_Shader));
 
-    printf("Shaders_newShader()\n");
-
     GLuint vertShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-
-    printf("Shader IDs created\n");
 
     GLint result = GL_FALSE;
     int infoLogLength = 0;
@@ -51,7 +46,7 @@ ODIN_Shader* Shaders_newShader(unsigned char* name, ODIN_ShaderSource* vert_shad
     glGetShaderiv(vertShaderID, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(vertShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 	if ( infoLogLength > 0 ){
-		unsigned char* vertexShaderErrorMessage = (unsigned char*)malloc(sizeof(unsigned char) * (infoLogLength+1));
+		GLchar* vertexShaderErrorMessage = (GLchar*)calloc(infoLogLength + 1, sizeof(GLchar));
 		glGetShaderInfoLog(vertShaderID, infoLogLength, NULL, vertexShaderErrorMessage);
 		printf("VertexShader Error: %s\n", vertexShaderErrorMessage);
         free(vertexShaderErrorMessage);
@@ -64,20 +59,48 @@ ODIN_Shader* Shaders_newShader(unsigned char* name, ODIN_ShaderSource* vert_shad
     glGetShaderiv(fragShaderID, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(fragShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 	if ( infoLogLength > 0 ){
-		unsigned char* fragmentShaderErrorMessage = (unsigned char*)malloc(sizeof(unsigned char) * (infoLogLength+1));
+        GLchar* fragmentShaderErrorMessage = (GLchar*)calloc(infoLogLength + 1, sizeof(GLchar));
 		glGetShaderInfoLog(fragShaderID, infoLogLength, NULL, fragmentShaderErrorMessage);
 		printf("VertexShader Error: %s\n", fragmentShaderErrorMessage);
         free(fragmentShaderErrorMessage);
 	}
 
     // TODO: Link the GL Shader Program
+    printf("Linking Shader Program.\n");
+    shader->program_id = glCreateProgram();
+    
+    glAttachShader(shader->program_id, vertShaderID);
+    glAttachShader(shader->program_id, fragShaderID);
+    glLinkProgram(shader->program_id);
+    
+    // Chech program for errors
+    glGetProgramiv(shader->program_id, GL_LINK_STATUS, &result);
+    glGetProgramiv(shader->program_id, GL_INFO_LOG_LENGTH, &infoLogLength);
+    if ( infoLogLength > 0 ) {
+        GLchar* programErrorMessage = (GLchar*)calloc(infoLogLength + 1, sizeof(GLchar));
+        glGetProgramInfoLog(shader->program_id, infoLogLength, NULL, programErrorMessage);
+        printf("Shader Program Error: %s\n", programErrorMessage);
+        free(programErrorMessage);
+    }
+    
+    glDetachShader(shader->program_id, vertShaderID);
+    glDetachShader(shader->program_id, fragShaderID);
+    
+    glDeleteShader(vertShaderID);
+    glDeleteShader(fragShaderID);
 
-    shader->name = (unsigned char*)malloc(sizeof(unsigned char) * (strlen(name) + 1));
-    memcpy(shader->name, name, sizeof(unsigned char) * (strlen(name) + 1));
+    shader->name = (unsigned char*)calloc(strlen((const char*)name) + 1, sizeof(unsigned char));
+    memcpy(shader->name, name, sizeof(unsigned char) * strlen(name)); // All bytes are already null, no need to copy it too
 
-    return 0;
+    return shader;
 }
 
 int Shaders_freeShader(ODIN_Shader* shader) {
-
+    // Free the  name
+    free(shader->name);
+    
+    glDeleteProgram(shader->program_id);
+    free(shader);
+    
+    return 1;
 }
