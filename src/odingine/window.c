@@ -35,7 +35,6 @@ ODIN_Window* Window_new(const char* title, const int width, const int height) {
         return 0;
     }
 
-
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) {
@@ -50,6 +49,10 @@ ODIN_Window* Window_new(const char* title, const int width, const int height) {
 
 	// Make GL Context Current
 	SDL_GL_MakeCurrent(odin_window->window, odin_window->context);
+
+	// Enable hardware depth testing and model vertex draw ordering
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
     // Set VSync
     if (SDL_GL_SetSwapInterval(1) < 0) {

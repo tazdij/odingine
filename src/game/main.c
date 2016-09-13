@@ -344,9 +344,14 @@ int main(int argc, char* argv[]) {
 	// printf("The Last argument is: %s\n", VMQ_GetString(message, -1));
     
     // TEST: Matrices
+	vec3_t cam_pos = vec3_create(NULL);
+	cam_pos[0] = 4.0f;
+	cam_pos[1] = 3.0f;
+	cam_pos[2] = 3.0f;
+
     mat4_t projection = mat4_perspective(45.0, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.5f, 100.0f, NULL);
     mat4_t view = mat4_lookAt(
-                              (float[]){4.0f, 3.0f, 3.0f},
+                              cam_pos,
                               (float[]){0.0f, 0.0f, 0.0f},
                               (float[]){0.0f, 1.0f, 0.0f},
                               NULL);
@@ -406,7 +411,21 @@ int main(int argc, char* argv[]) {
 				
 				if (e.key.keysym.sym == SDLK_ESCAPE) {
 					quit = 1;
+				} else if (e.key.keysym.sym == SDLK_d) {
+					cam_pos[0] += 0.1f;
+				} else if (e.key.keysym.sym == SDLK_a) {
+					cam_pos[0] -= 0.1f;
 				}
+
+				mat4_lookAt(
+							cam_pos,
+							(float[]) {0.0f, 0.0f, 0.0f},
+							(float[]) {0.0f, 1.0f, 0.0f},
+							view);
+
+				// Calculate the MVP
+				mat4_multiply(projection, view, mvp);
+				mat4_multiply(model, mvp, mvp);
 			}
 		}
 
@@ -453,6 +472,7 @@ int main(int argc, char* argv[]) {
     free(projection);
     free(view);
     free(model);
+	free(mvp);
 
 	close();
 
