@@ -165,9 +165,26 @@ int BitmapResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned cha
 	printf("BitmapResource_Loader called: resource file = %s\n", resource->fname);
 
 	printf("TODO: BitmapResource_Loader not implemented yet.\n");
+    
+    // Create the Texture
+    
+    // Read the Bitmap
+    unsigned char header[54];
+    unsigned int dataPos = 0;
+    unsigned int width = 0;
+    unsigned int height = 0;
+    unsigned int imageSize = 0;
+    unsigned char* data = 0;
+    
+    memcpy(header, rawdata, sizeof(unsigned char) * 54);
 	
 	
 	return 1;
+}
+
+int TextureResource_Unloader(ODIN_Resource* res) {
+    
+    return 0;
 }
 
 int VertexShaderResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
@@ -243,6 +260,7 @@ int TextResource_Unloader(ODIN_Resource* resource) {
 }
 
 
+
 int main(int argc, char* argv[]) {
 	printf("Odinheim, you are becoming greater!\n");
 
@@ -256,12 +274,15 @@ int main(int argc, char* argv[]) {
 
 	// TEST:
 	Resources_addSearchPath("./assets", 1);
-	ODIN_UInt64 RESTYPE_BITMAP = Resources_registerType();
+	ODIN_UInt64 RESTYPE_TEXTURE = Resources_registerType();
 	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
 	ODIN_UInt64 RESTYPE_SHADERSRC = Resources_registerType();
 	
-	Resources_registerLoader(RESTYPE_BITMAP, &BitmapResource_Loader, "*.bmp");
-
+	Resources_registerLoader(RESTYPE_TEXTURE, &BitmapResource_Loader, "*.bmp");
+    //Resources_registerLoader(RESTYPE_TEXTURE, &TGAResource_Loader, "*.tga");
+    //Resources_registerLoader(RESTYPE_TEXTURE, &DDSResource_Loader, "*.dds");
+    Resources_registerUnloader(RESTYPE_TEXTURE, &TextureResource_Unloader);
+    
 	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
 	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
 
@@ -388,6 +409,12 @@ int main(int argc, char* argv[]) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 108, colors, GL_STATIC_DRAW);
     
 
+    bool leftKey = 0;
+    bool rightKey = 0;
+    bool upKey = 0;
+    bool downKey = 0;
+    bool outKey = 0;
+    bool inKey = 0;
 
 
 	// Create a VikingMQ
@@ -412,22 +439,56 @@ int main(int argc, char* argv[]) {
 				if (e.key.keysym.sym == SDLK_ESCAPE) {
 					quit = 1;
 				} else if (e.key.keysym.sym == SDLK_d) {
-					cam_pos[0] += 0.1f;
+                    rightKey = 1;
 				} else if (e.key.keysym.sym == SDLK_a) {
-					cam_pos[0] -= 0.1f;
-				}
-
-				mat4_lookAt(
-							cam_pos,
-							(float[]) {0.0f, 0.0f, 0.0f},
-							(float[]) {0.0f, 1.0f, 0.0f},
-							view);
-
-				// Calculate the MVP
-				mat4_multiply(projection, view, mvp);
-				mat4_multiply(model, mvp, mvp);
-			}
+                    leftKey = 1;
+                } else if (e.key.keysym.sym == SDLK_w) {
+                    upKey = 1;
+                } else if (e.key.keysym.sym == SDLK_s) {
+                    downKey = 1;
+                } else if (e.key.keysym.sym == SDLK_q) {
+                    outKey = 1;
+                } else if (e.key.keysym.sym == SDLK_e) {
+                    inKey = 1;
+                }
+            } else if (e.type == SDL_KEYUP) {
+                if (e.key.keysym.sym == SDLK_d) {
+                    rightKey = 0;
+                } else if (e.key.keysym.sym == SDLK_a) {
+                    leftKey = 0;
+                } else if (e.key.keysym.sym == SDLK_w) {
+                    upKey = 0;
+                } else if (e.key.keysym.sym == SDLK_s) {
+                    downKey = 0;
+                } else if (e.key.keysym.sym == SDLK_q) {
+                    outKey = 0;
+                } else if (e.key.keysym.sym == SDLK_e) {
+                    inKey = 0;
+                }
+            }
 		}
+        
+        if (leftKey | rightKey | upKey | downKey | inKey | outKey) {
+            
+            cam_pos[0] += rightKey * 0.1f;
+            cam_pos[0] -= leftKey * 0.1f;
+            
+            cam_pos[1] += upKey * 0.1f;
+            cam_pos[1] -= downKey * 0.1f;
+            
+            cam_pos[2] -= inKey * 0.1f;
+            cam_pos[2] += outKey * 0.1f;
+            
+            mat4_lookAt(
+                        cam_pos,
+                        (float[]) {0.0f, 0.0f, 0.0f},
+                        (float[]) {0.0f, 1.0f, 0.0f},
+                        view);
+            
+            // Calculate the MVP
+            mat4_multiply(projection, view, mvp);
+            mat4_multiply(model, mvp, mvp);
+        }
 
 		while (VMQ_ProcessMessage(queue)) {
 			// This will loop until the queue is empty
