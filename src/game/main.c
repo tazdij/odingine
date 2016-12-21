@@ -22,6 +22,7 @@
 #include "window.h"
 #include "resources.h"
 #include "shaders.h"
+#include "textures.h"
 
 #include "viking_math.h"
 
@@ -118,6 +119,45 @@ static const GLfloat colors[108] = {
     0.982f,  0.099f,  0.879f
 };
 
+static const GLfloat uvs[72] = {
+    0.000059f, 1.0f-0.000004f,
+    0.000103f, 1.0f-0.336048f,
+    0.335973f, 1.0f-0.335903f,
+    1.000023f, 1.0f-0.000013f,
+    0.667979f, 1.0f-0.335851f,
+    0.999958f, 1.0f-0.336064f,
+    0.667979f, 1.0f-0.335851f,
+    0.336024f, 1.0f-0.671877f,
+    0.667969f, 1.0f-0.671889f,
+    1.000023f, 1.0f-0.000013f,
+    0.668104f, 1.0f-0.000013f,
+    0.667979f, 1.0f-0.335851f,
+    0.000059f, 1.0f-0.000004f,
+    0.335973f, 1.0f-0.335903f,
+    0.336098f, 1.0f-0.000071f,
+    0.667979f, 1.0f-0.335851f,
+    0.335973f, 1.0f-0.335903f,
+    0.336024f, 1.0f-0.671877f,
+    1.000004f, 1.0f-0.671847f,
+    0.999958f, 1.0f-0.336064f,
+    0.667979f, 1.0f-0.335851f,
+    0.668104f, 1.0f-0.000013f,
+    0.335973f, 1.0f-0.335903f,
+    0.667979f, 1.0f-0.335851f,
+    0.335973f, 1.0f-0.335903f,
+    0.668104f, 1.0f-0.000013f,
+    0.336098f, 1.0f-0.000071f,
+    0.000103f, 1.0f-0.336048f,
+    0.000004f, 1.0f-0.671870f,
+    0.336024f, 1.0f-0.671877f,
+    0.000103f, 1.0f-0.336048f,
+    0.336024f, 1.0f-0.671877f,
+    0.335973f, 1.0f-0.335903f,
+    0.667969f, 1.0f-0.671889f,
+    1.000004f, 1.0f-0.671847f,
+    0.667979f, 1.0f-0.335851f
+};
+
 GLuint VaoID = 0;
 GLuint VboID = 0;
 // End OpenGL rendering Test
@@ -163,8 +203,6 @@ void KeypressListener(VMQ_Message *message, void* ctx) {
 int BitmapResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
 	// TODO: Load the resource from the rawdata
 	printf("BitmapResource_Loader called: resource file = %s\n", resource->fname);
-
-	printf("TODO: BitmapResource_Loader not implemented yet.\n");
     
     // Create the Texture
     
@@ -195,10 +233,16 @@ int BitmapResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned cha
 		dataPos = 54;
 
 	// Allocate the Memory needed for the image
-	data = (unsigned char*)malloc(sizeof(unsigned char) * imageSize);
-	
-	memcpy(data, rawdata, sizeof(unsigned char) * size);
-
+	data = (unsigned char*)malloc(sizeof(unsigned char) * size);
+	memcpy((void*)data, rawdata, sizeof(unsigned char) * size);
+    
+    resource->buffer = (void*)Textures_createTexture(width, height, GL_RGB, size, rawdata);
+    resource->buffer_size = sizeof(ODIN_Texture);
+    
+    //TODO: Get the complete size of the resource in memory
+    
+    free(data);
+    
 	return 1;
 }
 
@@ -428,6 +472,13 @@ int main(int argc, char* argv[]) {
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 108, colors, GL_STATIC_DRAW);
     
+    GLuint uvbuffer;
+    glGenBuffers(1, &uvbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 72, uvs, GL_STATIC_DRAW);
+    
+    
+    
 
     bool leftKey = 0;
     bool rightKey = 0;
@@ -539,6 +590,19 @@ int main(int argc, char* argv[]) {
                               0,                   // stride
                               (void*)0             // array buffer offset
                               );
+        
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glVertexAttribPointer(
+                              2,                   // attribute. No particular reason for 1, but must match the layout in the shader.
+                              2,                   // size (num elements)
+                              GL_FLOAT,            // element type
+                              GL_FALSE,            // normalized?
+                              0,                   // stride
+                              (void*)0             // array buffer offset
+                              );
+        
+
         
 		glDrawArrays(GL_TRIANGLES, 0, 12*3);
 		glDisableVertexAttribArray(0);

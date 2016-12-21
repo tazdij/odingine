@@ -33,9 +33,13 @@ ODIN_Texture* Textures_createTexture(ODIN_UInt32 width, ODIN_UInt32 height, GLen
 	// Bind the new texture
 	glBindTexture(GL_TEXTURE_2D, tex->texture_id);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width);
+    // Pass the image data to
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, rawdata);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	return 0;
+	return tex;
 }
 
 int Textures_freeTexture(ODIN_Texture* tex) {
