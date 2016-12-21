@@ -176,9 +176,29 @@ int BitmapResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned cha
     unsigned int imageSize = 0;
     unsigned char* data = 0;
     
+	// Get the header from the passed in data
     memcpy(header, rawdata, sizeof(unsigned char) * 54);
+
+	if (header[0] != 'B' || header[1] != 'M') {
+		return 0;
+	}
+
+	dataPos = *(int*)&(header[0x0A]);
+	imageSize = *(int*)&(header[0x22]);
+	width = *(int*)&(header[0x12]);
+	height = *(int*)&(header[0x16]);
 	
+	if (imageSize == 0)
+		imageSize = width * height * 3;
+
+	if (dataPos == 0)
+		dataPos = 54;
+
+	// Allocate the Memory needed for the image
+	data = (unsigned char*)malloc(sizeof(unsigned char) * imageSize);
 	
+	memcpy(data, rawdata, sizeof(unsigned char) * size);
+
 	return 1;
 }
 
