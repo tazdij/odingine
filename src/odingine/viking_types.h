@@ -1,3 +1,6 @@
+#ifndef __VIKING_TYPES_H__
+#define __VIKING_TYPES_H__
+
 #include <stdint.h>
 
 typedef unsigned char ODIN_UByte;
@@ -11,3 +14,4 @@ typedef uint64_t ODIN_UInt64;
 
 
 
+#endif
