@@ -24,7 +24,7 @@ typedef struct ODIN_MeshBuffer {
 	GLenum buffer_type; // The type of buffer GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER
 	GLubyte element_size; // The size of each element in bytes
 	GLenum element_type; // The actual type of the data in the buffer
-	GLuint element_count; // The count of elements in the buffer
+	GLuint component_count; // The number of elements per component (x, y, z) = 3
 } ODIN_MeshBuffer;
 
 typedef struct ODIN_Mesh {
@@ -32,8 +32,8 @@ typedef struct ODIN_Mesh {
 	GLuint vao_id;
 	
 	// The index buffer will be managed by the Mesh directly
-	GLuint vertex_count; // Should this be the unique vertex count or the total number of indices?
-	GLuint ibx_id;
+	GLsizei ibo_count; // Should this be the unique vertex count or the total number of indices?
+	GLuint ibo_id;
 
     // buffers is always malloc'd for 16 elements.
 	ODIN_MeshBuffer* buffers;
@@ -43,11 +43,11 @@ typedef struct ODIN_Mesh {
 ODIN_Mesh* Mesh_newMesh();
 void Mesh_freeMesh(ODIN_Mesh* mesh);
 
-void Mesh_loadVertexData(ODIN_Mesh* mesh, GLuint vertex_count, GLfloat vetices, GLuint index_count, GLfloat indeces);
+void Mesh_loadIBOData(ODIN_Mesh* mesh, GLuint* data, GLsizei count);
 
-void Mesh_loadBuffer(ODIN_Mesh* mesh, GLuint location, GLenum buffer_type,
-						GLenum element_type, GLubyte element_size, GLuint element_count,
-                        void* data);
+void Mesh_loadBufferData(ODIN_Mesh* mesh, GLuint location, GLenum buffer_type,
+                         GLenum element_type, GLsizei element_size, GLuint component_count,
+                         void* data, GLsizei data_count);
 
 void Mesh_bindVao(ODIN_Mesh* mesh);
 void Mesh_unbindVao();
