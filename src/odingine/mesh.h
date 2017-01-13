@@ -31,8 +31,9 @@ typedef struct ODIN_Mesh {
 
 	GLuint vao_id;
 	
-	// I don't think we actually need this anymore
+	// The index buffer will be managed by the Mesh directly
 	GLuint vertex_count; // Should this be the unique vertex count or the total number of indices?
+	GLuint ibx_id;
 
     // buffers is always malloc'd for 16 elements.
 	ODIN_MeshBuffer* buffers;
@@ -42,7 +43,9 @@ typedef struct ODIN_Mesh {
 ODIN_Mesh* Mesh_newMesh();
 void Mesh_freeMesh(ODIN_Mesh* mesh);
 
-void Mesh_createBuffer(ODIN_Mesh* mesh, GLuint location, GLenum buffer_type,
+void Mesh_loadVertexData(ODIN_Mesh* mesh, GLuint vertex_count, GLfloat vetices, GLuint index_count, GLfloat indeces);
+
+void Mesh_loadBuffer(ODIN_Mesh* mesh, GLuint location, GLenum buffer_type,
 						GLenum element_type, GLubyte element_size, GLuint element_count,
                         void* data);
 
