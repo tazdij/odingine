@@ -41,7 +41,8 @@ void close();
 // Window pointer
 static ODIN_Window* window = 0;
 
-
+// Test OpenGL rendering
+/*
 static const GLuint indices[36] = {
     0, 1, 2,
     3, 0, 4,
@@ -57,7 +58,6 @@ static const GLuint indices[36] = {
     7, 2, 5
 };
 
-// Test OpenGL rendering
 static const GLfloat vertices[24] = {
     
     
@@ -95,7 +95,40 @@ static const GLfloat uvs[16] = {
     
 	0.667979f, 1.0f-0.335851f,
     0.336024f, 1.0f-0.671877f,
+}; */
+
+static const GLuint indices[12] = {
+	0, 1, 2, // Front Tri
+	2, 3, 0, // Right Tri
+	0, 3, 4, // Back Tri
+	4, 1, 0  // Left Tri
 };
+
+static const GLfloat vertices[15] = {
+	 0.0f, 1.0f, 0.0f, // 0 - Top Center
+	-1.0f,-1.0f,-1.0f, // 1 - Bottom Left Front
+	 1.0f,-1.0f,-1.0f, // 2 - Bottom Right Front
+	 1.0f,-1.0f, 1.0f, // 3 - Bottom Right Back
+	-1.0f,-1.0f, 1.0f  // 4 - Bottom Left Back
+};
+
+static const GLfloat colors[15] = {
+	1.0f, 0.0f, 0.0f,
+	0.5f, 0.5f, 0.0f,
+	0.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 1.0f,
+	0.0f, 0.5f, 0.5f
+};
+
+
+static const GLfloat uvs[10] = {
+	0.5f, 0.5f,
+	0.0f, 1.0f,
+	1.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 0.0f
+};
+
 
 // End OpenGL rendering Test
 
@@ -386,7 +419,7 @@ int main(int argc, char* argv[]) {
     mat4_multiply(projection, view, mvp);
     mat4_multiply(model, mvp, mvp);
     
-    GLuint MvpID = glGetUniformLocation(shaderTest->program_id, "MVP");
+    //GLuint MvpID = glGetUniformLocation(shaderTest->program_id, "MVP");
     
     
     // END Matrices Init
@@ -398,13 +431,14 @@ int main(int argc, char* argv[]) {
 	printf("Starting gl triangle setup.\n");
 	
 	
+	// TEMP: Test the Mesh Object
     ODIN_Mesh* mesh =  Mesh_newMesh();
-    Mesh_loadBufferData(mesh, 0, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 3, &vertices[0], 24);
-    Mesh_loadBufferData(mesh, 1, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 3, &colors[0], 24);
-    Mesh_loadBufferData(mesh, 2, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 2, &uvs[0], 16);
-    
+    Mesh_loadBufferData(mesh, 0, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 3, &vertices[0], 15);
+    Mesh_loadBufferData(mesh, 1, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 3, &colors[0], 15);
+    Mesh_loadBufferData(mesh, 2, GL_ARRAY_BUFFER, GL_FLOAT, sizeof(GLfloat), 2, &uvs[0], 10);
+
     // Load the index buffer now
-    Mesh_loadIBOData(mesh, &indices[0], 36);
+    Mesh_loadIBOData(mesh, &indices[0], 12);
     
     
 
@@ -489,63 +523,38 @@ int main(int argc, char* argv[]) {
             mat4_multiply(model, mvp, mvp);
         }
 
+
+		/* Check for Messages in VikingMQ */
 		while (VMQ_ProcessMessage(queue)) {
 			// This will loop until the queue is empty
 		}
 
-		/* Check for Messages in VikingMQ */
+		
 
 
 		// OpenGL Rendering loop
 		Window_clearColor(100.0/255.0, 149.0/255.0, 237.0/255.0, 1.0);
         
         
-        glUseProgram(shaderTest->program_id);
-        glUniformMatrix4fv(MvpID, 1, GL_FALSE, mvp);
-
-        /*
-		// Render studd here?
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, VboID);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		Shaders_setShader(shaderTest);
+        Shaders_setUniformMat4(shaderTest, "MVP", mvp);
         
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(
-                              1,                   // attribute. No particular reason for 1, but must match the layout in the shader.
-                              3,                   // size (num elements)
-                              GL_FLOAT,            // element type
-                              GL_FALSE,            // normalized?
-                              0,                   // stride
-                              (void*)0             // array buffer offset
-                              );
-        
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-        glVertexAttribPointer(
-                              2,                   // attribute. No particular reason for 1, but must match the layout in the shader.
-                              2,                   // size (num elements)
-                              GL_FLOAT,            // element type
-                              GL_FALSE,            // normalized?
-                              0,                   // stride
-                              (void*)0             // array buffer offset
-                              );
-        
-
-        
-		glDrawArrays(GL_TRIANGLES, 0, 12*3);
-		glDisableVertexAttribArray(0);
-        */
-        
-        // Bind mesh vao
+        // Bind mesh vao, This also binds the ibo if present
         Mesh_bindVao(mesh);
         
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+		// Draw the Elements from the 
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
         
+		// Unbind mesh ibo and vao
         Mesh_unbindVao();
 
-		Window_swapBuffer(window);
 
+		// Unset the Shader Program Used
+		Shaders_unsetShader();
+
+
+		// Swap the buffer
+		Window_swapBuffer(window);
 	}
 	
     Shaders_freeShader(shaderTest);

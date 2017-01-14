@@ -104,3 +104,42 @@ int Shaders_freeShader(ODIN_Shader* shader) {
     
     return 1;
 }
+
+void Shaders_setShader(ODIN_Shader* shader) {
+	glUseProgram(shader->program_id);
+}
+
+void Shaders_unsetShader() {
+	glUseProgram(0);
+}
+
+
+GLint Shaders_getUniformLocation(ODIN_Shader* shader, const GLchar* name) {
+	// TODO: add fetch from cached map
+
+	return glGetUniformLocation(shader->program_id, name);
+}
+
+void Shaders_setUniform1f(ODIN_Shader* shader, const GLchar* name, float val) {
+	glUniform1f(Shaders_getUniformLocation(shader, name), val);
+}
+
+void Shaders_setUniform1i(ODIN_Shader* shader, const GLchar* name, int val) {
+	glUniform1i(Shaders_getUniformLocation(shader, name), val);
+}
+
+void Shaders_setUniform2f(ODIN_Shader* shader, const GLchar* name, vec3_t* vec) {
+	glUniform2fv(Shaders_getUniformLocation(shader, name), 2, vec);
+}
+
+void Shaders_setUniform3f(ODIN_Shader* shader, const GLchar* name, vec3_t* vec) {
+	glUniform3fv(Shaders_getUniformLocation(shader, name), 3, vec);
+}
+
+void Shaders_setUniform4f(ODIN_Shader* shader, const GLchar* name, vec4_t* vec) {
+	glUniform4fv(Shaders_getUniformLocation(shader, name), 4, vec);
+}
+
+void Shaders_setUniformMat4(ODIN_Shader* shader, const GLchar* name, mat4_t* mat) {
+	glUniformMatrix4fv(Shaders_getUniformLocation(shader, name), 1, GL_FALSE, mat);
+}

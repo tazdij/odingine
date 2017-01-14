@@ -76,9 +76,9 @@ void Mesh_loadBufferData(ODIN_Mesh* mesh, GLuint location, GLenum buffer_type,
     buffer->component_count = component_count;
     buffer->buffer_location = location;
     
-    glGenBuffers(1, &buffer->vbo_id);
-    glBindBuffer(buffer_type, buffer->vbo_id);
-    glBufferData(buffer_type, data_count * element_size, data, GL_STATIC_DRAW);
+    glGenBuffers(1, &buffer->vbo_id); // Generate the buffer in the video card
+    glBindBuffer(buffer_type, buffer->vbo_id); // Bind to the buffer
+    glBufferData(buffer_type, data_count * element_size, data, GL_STATIC_DRAW); // Load into memory
     
     
     //glEnableVertexAttribArray(index);
