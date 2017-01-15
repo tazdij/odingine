@@ -42,60 +42,6 @@ void close();
 static ODIN_Window* window = 0;
 
 // Test OpenGL rendering
-/*
-static const GLuint indices[36] = {
-    0, 1, 2,
-    3, 0, 4,
-    5, 0, 6,
-    3, 6, 0,
-    0, 2, 4,
-    5, 1, 0,
-    2, 1, 5,
-    7, 6, 3,
-    6, 7, 5,
-    7, 3, 4,
-    7, 4, 2,
-    7, 2, 5
-};
-
-static const GLfloat vertices[24] = {
-    
-    
-        -1.0f,-1.0f,-1.0f, // 0
-        -1.0f,-1.0f, 1.0f, // 1
-        -1.0f, 1.0f, 1.0f, // 2
-    
-         1.0f, 1.0f,-1.0f, // 3
-        -1.0f, 1.0f,-1.0f, // 4
-    
-         1.0f,-1.0f, 1.0f, // 5
-         1.0f,-1.0f,-1.0f, // 6
-         1.0f, 1.0f, 1.0f  // 7
-};
-
-static const GLfloat colors[24] = {
-    0.583f,  0.771f,  0.014f,
-    0.609f,  0.115f,  0.436f,
-    0.327f,  0.483f,  0.844f,
-    0.822f,  0.569f,  0.201f,
-    0.435f,  0.602f,  0.223f,
-    0.310f,  0.747f,  0.185f,
-    0.597f,  0.770f,  0.761f,
-    0.559f,  0.436f,  0.730f
-};
-
-static const GLfloat uvs[16] = {
-    0.0f, 0.0f,
-    0.0f, -1.0f,
-    1.0f, 0.0f,
-    
-	1.0f, 0.0f,
-    0.0f, -1.0f,
-    1.0f, -1.0f,
-    
-	0.667979f, 1.0f-0.335851f,
-    0.336024f, 1.0f-0.671877f,
-}; */
 
 static const GLuint indices[12] = {
 	0, 1, 2, // Front Tri
@@ -267,6 +213,51 @@ int ShaderSourceResource_Unloader(ODIN_Resource* resource) {
 	return 1;
 }
 
+int ObjResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
+	unsigned char* tmpSource = (unsigned char*)malloc(sizeof(unsigned char) * (size + 1));
+	memcpy((void*)tmpSource, rawdata, sizeof(unsigned char) * (size + 1));
+	tmpSource[size] = 0;
+
+	float* verts;
+	float* uvs;
+	float* normals;
+
+	ODIN_UInt32 file_pos = 0;
+
+	while (1) {
+
+		char lineHeader[256];
+
+		int res = sscanf(tmpSource + file_pos, "%s", lineHeader);
+
+		printf("bytes read: %d\n", strlen(lineHeader));
+
+		if (res == EOF)
+			break;
+
+		file_pos += res;
+
+		if (!strcmp(lineHeader, "v")) {
+			printf("V found: %s\n", lineHeader);
+		} else {
+			printf("%s\n", lineHeader);
+		}
+
+	}
+
+	resource->buffer = (void*)Shaders_newShaderSource(ODIN_SHADERTYPE_FRAGMENT, tmpSource);
+	resource->total_bytes = sizeof(ODIN_ShaderSource) + (sizeof(unsigned char) * (size + 1));
+	resource->buffer_size = sizeof(ODIN_ShaderSource);
+
+	free(tmpSource);
+
+	
+}
+
+int MeshResource_Unloader(ODIN_Resource* resource) {
+
+}
+
 int TextResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
 	// TODO: Load the resource from the rawdata
 	// Since the text file does not contain the null terminator, we need to add it after
@@ -311,18 +302,26 @@ int main(int argc, char* argv[]) {
 	ODIN_UInt64 RESTYPE_TEXTURE = Resources_registerType();
 	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
 	ODIN_UInt64 RESTYPE_SHADERSRC = Resources_registerType();
+	ODIN_UInt64 RESTYPE_MESH = Resources_registerType();
 	
+	// Texture Loaders
 	Resources_registerLoader(RESTYPE_TEXTURE, &BitmapResource_Loader, "*.bmp");
     //Resources_registerLoader(RESTYPE_TEXTURE, &TGAResource_Loader, "*.tga");
     //Resources_registerLoader(RESTYPE_TEXTURE, &DDSResource_Loader, "*.dds");
     Resources_registerUnloader(RESTYPE_TEXTURE, &TextureResource_Unloader);
     
+	// Text Loaders
 	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
 	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
 
+	// Shader Loaders
 	Resources_registerLoader(RESTYPE_SHADERSRC, &VertexShaderResource_Loader, "*.vs");
 	Resources_registerLoader(RESTYPE_SHADERSRC, &FragmentShaderResource_Loader, "*.fs");
 	Resources_registerUnloader(RESTYPE_SHADERSRC, &ShaderSourceResource_Unloader);
+
+	// Mesh Loaders
+	Resources_registerLoader(RESTYPE_MESH, &ObjResource_Loader, "*.obj");
+	Resources_registerUnloader(RESTYPE_MESH, &MeshResource_Unloader);
     
     if (!init())
         return 1;
@@ -336,6 +335,8 @@ int main(int argc, char* argv[]) {
 	if (!Resources_loadResource("hello.txt")) {
 		printf("Unable to load file 'hello.txt', error happend.\n");
 	}
+
+	Resources_loadResource("cube.obj");
 
 	ODIN_Shader* shaderTest = 0;
 	ODIN_Resource* vertShaderRes = Resources_getResource("test.vs");
@@ -411,13 +412,23 @@ int main(int argc, char* argv[]) {
                               (float[]){0.0f, 1.0f, 0.0f},
                               NULL);
     mat4_t model = mat4_identity(NULL);
+	mat4_t model2 = mat4_identity(NULL);
+
+	vec3_t model2_pos = vec3_create(NULL);
+	model2_pos[0] = 2.0f;
+	model2_pos[1] = 0.0f;
+	model2_pos[2] = 2.0f;
+
+	mat4_translate(model2, model2_pos, NULL);
 
     
+	mat4_t vp = mat4_create(NULL);
     mat4_t mvp = mat4_create(NULL);
+
     
     // Calculate the MVP
-    mat4_multiply(projection, view, mvp);
-    mat4_multiply(model, mvp, mvp);
+    mat4_multiply(projection, view, vp);
+    mat4_multiply(vp, model, mvp);
     
     //GLuint MvpID = glGetUniformLocation(shaderTest->program_id, "MVP");
     
@@ -448,6 +459,8 @@ int main(int argc, char* argv[]) {
     bool downKey = 0;
     bool outKey = 0;
     bool inKey = 0;
+
+	
 
 
 	// Create a VikingMQ
@@ -519,15 +532,14 @@ int main(int argc, char* argv[]) {
                         view);
             
             // Calculate the MVP
-            mat4_multiply(projection, view, mvp);
-            mat4_multiply(model, mvp, mvp);
+            mat4_multiply(projection, view, vp);
         }
 
 
 		/* Check for Messages in VikingMQ */
-		while (VMQ_ProcessMessage(queue)) {
+		//while (VMQ_ProcessMessage(queue)) {
 			// This will loop until the queue is empty
-		}
+		//}
 
 		
 
@@ -537,6 +549,8 @@ int main(int argc, char* argv[]) {
         
         
 		Shaders_setShader(shaderTest);
+
+		mat4_multiply(vp, model, mvp);
         Shaders_setUniformMat4(shaderTest, "MVP", mvp);
         
         // Bind mesh vao, This also binds the ibo if present
@@ -547,6 +561,30 @@ int main(int argc, char* argv[]) {
         
 		// Unbind mesh ibo and vao
         Mesh_unbindVao();
+
+
+
+		
+		//vec3_str(model2_pos, buf);
+		//printf("model2_pos: %s\n", buf);
+
+		//mat4_str(model2, buf);
+		//printf("model2: %s\n", buf);
+
+		mat4_multiply(vp, model2, mvp);
+		//mat4_str(mvp, buf);
+		//printf("mvp: %s\n", buf);
+		Shaders_setUniformMat4(shaderTest, "MVP", mvp);
+
+		// Bind mesh vao, This also binds the ibo if present
+		Mesh_bindVao(mesh);
+
+		// Draw the Elements from the 
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+
+		// Unbind mesh ibo and vao
+		Mesh_unbindVao();
+
 
 
 		// Unset the Shader Program Used
@@ -562,6 +600,8 @@ int main(int argc, char* argv[]) {
     free(projection);
     free(view);
     free(model);
+	free(model2);
+	free(model2_pos);
 	free(mvp);
 
 	close();

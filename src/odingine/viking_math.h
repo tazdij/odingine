@@ -41,11 +41,11 @@ ODIN_Vec4 Maths_newVec4(ODIN_Vec4 ori);
  OLD MATH HEADER
 *****************************************************************/
     
-typedef float *vec3_t;
-typedef float *vec4_t;
-typedef float *mat3_t;
-typedef float *mat4_t;
-typedef float *quat_t;
+typedef float* vec3_t;
+typedef float* vec4_t;
+typedef float* mat3_t;
+typedef float* mat4_t;
+typedef float* quat_t;
     
 /*
  * vec3_t - 3 Dimensional Vector
