@@ -43,6 +43,6 @@ ODIN_Texture* Textures_createTexture(ODIN_UInt32 width, ODIN_UInt32 height, GLen
 }
 
 int Textures_freeTexture(ODIN_Texture* tex) {
-
+	glDeleteTextures(1, &(tex->texture_id));
 	return 0;
 }

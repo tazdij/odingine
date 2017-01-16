@@ -28,6 +28,8 @@
 
 #include "viking_math.h"
 
+#include "mpc.h"
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -214,6 +216,8 @@ int ShaderSourceResource_Unloader(ODIN_Resource* resource) {
 }
 
 int ObjResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
+	printf("Loading .obj file: %s\n", resource->fname);
+
 	unsigned char* tmpSource = (unsigned char*)malloc(sizeof(unsigned char) * (size + 1));
 	memcpy((void*)tmpSource, rawdata, sizeof(unsigned char) * (size + 1));
 	tmpSource[size] = 0;
@@ -222,32 +226,59 @@ int ObjResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* 
 	float* uvs;
 	float* normals;
 
-	ODIN_UInt32 file_pos = 0;
+	int file_pos = 0;
 
-	while (1) {
+	mpc_result_t r;
+	mpc_parser_t* Number = mpc_new("number");
+	mpc_parser_t* Symbol = mpc_new("symbol");
+	mpc_parser_t* Index = mpc_new("index");
+	mpc_parser_t* V = mpc_new("v");
+	mpc_parser_t* Vt = mpc_new("vt");
+	mpc_parser_t* Vn = mpc_new("vn");
+	mpc_parser_t* G = mpc_new("g");
+	mpc_parser_t* Usemtl = mpc_new("usemtl");
+	mpc_parser_t* Mtllib = mpc_new("mtllib");
+	mpc_parser_t* S = mpc_new("s");
+	mpc_parser_t* F = mpc_new("f");
+	mpc_parser_t* Cmd = mpc_new("cmd");
+	mpc_parser_t* Obj = mpc_new("obj");
 
-		char lineHeader[256];
+	mpc_err_t* err = mpca_lang(MPCA_LANG_DEFAULT,
+		"number               : /[\\-0-9\\.]/                         ; \
+		 symbol               : /[a-zA-Z\\._\\-]+/					  ; \
+		 index                : <number> '/' <number> '/' <number>    ; \
+		 v                    : \"v\" <number>+      ; \
+		 vt                   : \"vt\" <number>+              ; \
+		 vn                   : \"vn\" <number>+     ; \
+		 g                    : \"g\" <symbol>                        ; \
+		 usemtl               : \"usemtl\" <symbol>                   ; \
+		 mtllib               : \"mtllib\" <symbol>                   ; \
+		 s                    : \"s\" <number>                        ; \
+		 f                    : \"f\" <index>+         ; \
+		 cmd                  : <usemtl> | <mtllib> | <vn> | <vt> | <v> | <g> | <s> | <f> ; \
+		 obj                  : /^/ <cmd>* /$/ ;"
+		, Number, Symbol, Index, V, Vt, Vn, G, Usemtl, Mtllib, S, F, Cmd, Obj, NULL);
 
-		int res = sscanf(tmpSource + file_pos, "%s", lineHeader);
-
-		printf("bytes read: %d\n", strlen(lineHeader));
-
-		if (res == EOF)
-			break;
-
-		file_pos += res;
-
-		if (!strcmp(lineHeader, "v")) {
-			printf("V found: %s\n", lineHeader);
-		} else {
-			printf("%s\n", lineHeader);
-		}
-
+	if (err != NULL) {
+		mpc_err_print(err);
+		mpc_err_delete(err);
+		//exit(1);
 	}
 
-	resource->buffer = (void*)Shaders_newShaderSource(ODIN_SHADERTYPE_FRAGMENT, tmpSource);
-	resource->total_bytes = sizeof(ODIN_ShaderSource) + (sizeof(unsigned char) * (size + 1));
-	resource->buffer_size = sizeof(ODIN_ShaderSource);
+	if (mpc_parse(resource->fname, tmpSource, Obj, &r)) {
+		mpc_ast_print(r.output);
+		mpc_ast_delete(r.output);
+	} else {
+		mpc_err_print(r.error);
+		mpc_err_delete(r.error);
+	}
+
+
+	mpc_cleanup(13, Number, Symbol, Index, V, Vt, Vn, G, Usemtl, Mtllib, S, F, Cmd, Obj);
+
+	//resource->buffer = (void*)Shaders_newShaderSource(ODIN_SHADERTYPE_FRAGMENT, tmpSource);
+	//resource->total_bytes = sizeof(ODIN_ShaderSource) + (sizeof(unsigned char) * (size + 1));
+	//resource->buffer_size = sizeof(ODIN_ShaderSource);
 
 	free(tmpSource);
 
