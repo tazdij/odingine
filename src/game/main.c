@@ -23,12 +23,13 @@
 #include "resources.h"
 #include "shaders.h"
 #include "textures.h"
-
 #include "mesh.h"
 
 #include "viking_math.h"
 
 #include "mpc.h"
+
+#include "builtin_types.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -335,32 +336,6 @@ int MeshResource_Unloader(ODIN_Resource* resource) {
 
 }
 
-int TextResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
-	// TODO: Load the resource from the rawdata
-	// Since the text file does not contain the null terminator, we need to add it after
-	// copying the rawdata into our resource buffer
-	printf("TextResource_Loader called: resource file = %s\n", resource->fname);
-	
-	resource->buffer_size = sizeof(unsigned char) * size;
-	resource->total_bytes = sizeof(unsigned char) * size;
-
-	resource->buffer = (void*)malloc(sizeof(unsigned char) * (size + 1));
-	memcpy((void*)resource->buffer, rawdata, sizeof(unsigned char) * (size + 1));
-	char* text = (char*)resource->buffer;
-	text[size] = 0; // add the null terminator
-
-	return 1;
-}
-
-int TextResource_Unloader(ODIN_Resource* resource) {
-	resource->buffer_size = 0;
-	resource->total_bytes = 0;
-	free(resource->buffer);
-	resource->buffer = 0;
-
-	return 1;
-}
-
 
 
 int main(int argc, char* argv[]) {
@@ -376,8 +351,11 @@ int main(int argc, char* argv[]) {
 
 	// TEST:
 	Resources_addSearchPath("./assets", 1);
+
+	// Register Built In Types
+	BuiltinTypes_init();
+	
 	ODIN_UInt64 RESTYPE_TEXTURE = Resources_registerType();
-	ODIN_UInt64 RESTYPE_TEXT = Resources_registerType();
 	ODIN_UInt64 RESTYPE_SHADERSRC = Resources_registerType();
 	ODIN_UInt64 RESTYPE_MESH = Resources_registerType();
 	
@@ -387,10 +365,6 @@ int main(int argc, char* argv[]) {
     //Resources_registerLoader(RESTYPE_TEXTURE, &DDSResource_Loader, "*.dds");
     Resources_registerUnloader(RESTYPE_TEXTURE, &TextureResource_Unloader);
     
-	// Text Loaders
-	Resources_registerLoader(RESTYPE_TEXT, &TextResource_Loader, "*.txt");
-	Resources_registerUnloader(RESTYPE_TEXT, &TextResource_Unloader);
-
 	// Shader Loaders
 	Resources_registerLoader(RESTYPE_SHADERSRC, &VertexShaderResource_Loader, "*.vs");
 	Resources_registerLoader(RESTYPE_SHADERSRC, &FragmentShaderResource_Loader, "*.fs");
