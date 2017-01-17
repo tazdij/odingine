@@ -215,6 +215,45 @@ int ShaderSourceResource_Unloader(ODIN_Resource* resource) {
 	return 1;
 }
 
+int ObjResource_numberOfNodes(mpc_ast_t* t) {
+	if (t->children_num == 0) { return 1; }
+	if (t->children_num >= 1) {
+		int total = 1;
+		for (int i = 0; i < t->children_num; i++) {
+			total = total + ObjResource_numberOfNodes(t->children[i]);
+		}
+		return total;
+	}
+
+	return 0;
+}
+
+typedef struct {
+	float* verts;
+	int num_verts;
+
+	float* uvs;
+	int num_uvs;
+
+	float* normals;
+	int num_normals;
+
+	/*
+	OJB Format
+	f 1/1/10 2/1/30 3/2/1
+
+	f: the prefix for the Polygon or Shape creation
+	1/1/10: this is the indexes for the first point in the Polygon
+	Vertex / UV / Normal
+	*/
+	int* indices; //the structure of this is 3 sets of 3 = one polygon
+	int num_indices;
+} ObjResource_t;
+
+ObjResource_t* ObjResource_loadAst(mpc_ast_t* t) {
+	return NULL;
+}
+
 int ObjResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* rawdata) {
 	printf("Loading .obj file: %s\n", resource->fname);
 
@@ -267,6 +306,13 @@ int ObjResource_Loader(ODIN_Resource* resource, ODIN_Int64 size, unsigned char* 
 
 	if (mpc_parse(resource->fname, tmpSource, Obj, &r)) {
 		mpc_ast_print(r.output);
+		mpc_ast_t* ast = (mpc_ast_t*)r.output;
+
+		//int total_nodes = ObjResource_numberOfNodes(ast);
+		//printf("Total Nodes: %d\n", total_nodes);
+
+		printf("num children: %d", ast->children_num);
+
 		mpc_ast_delete(r.output);
 	} else {
 		mpc_err_print(r.error);

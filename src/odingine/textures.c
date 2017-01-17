@@ -39,10 +39,22 @@ ODIN_Texture* Textures_createTexture(ODIN_UInt32 width, ODIN_UInt32 height, GLen
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	return tex;
 }
 
 int Textures_freeTexture(ODIN_Texture* tex) {
 	glDeleteTextures(1, &(tex->texture_id));
 	return 0;
+}
+
+void Textures_bindTexture(ODIN_Texture* tex) {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex->texture_id);
+	
+}
+
+void Textures_unbindTexture() {
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
