@@ -49,12 +49,13 @@ int Textures_freeTexture(ODIN_Texture* tex) {
 	return 0;
 }
 
-void Textures_bindTexture(ODIN_Texture* tex) {
-	glActiveTexture(GL_TEXTURE0);
+void Textures_bindTexture(ODIN_Texture* tex, GLenum texture_unit) {
+	glActiveTexture(texture_unit);
 	glBindTexture(GL_TEXTURE_2D, tex->texture_id);
 	
 }
 
-void Textures_unbindTexture() {
+void Textures_unbindTexture(GLenum texture_unit) {
+	glActiveTexture(texture_unit);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
